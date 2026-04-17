@@ -1,0 +1,6 @@
+[project]
+name = "static-warden"
+version = "0.1.0"
+description = "Dump linknwarded json file to searchable html file"
+requires-python = ">=3.13"
+dependencies = []
