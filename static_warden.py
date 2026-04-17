@@ -20,101 +20,28 @@ TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Bitwarden Vault Export</title>
+  <title>Static Warden</title>
   <style>
-    body {{ 
-      font-family: Roboto, Helvetica, Arial, sans-serif; 
-      margin: 0; 
-      background-color: #f5f5f5; 
-      color: rgba(0, 0, 0, 0.87);
-    }}
-    .app-bar {{
-      background-color: #1976d2;
-      color: white;
-      padding: 1rem 2rem;
-      box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 1100;
-    }}
-    .app-bar h1 {{ margin: 0; font-size: 1.25rem; font-weight: 500; }}
-    .container {{ max-width: 800px; margin: 2rem auto; padding: 0 1rem; }}
-    .search-container {{
-      margin-bottom: 2rem;
-      position: relative;
-    }}
-    input {{ 
-      width: 100%; 
-      padding: 12px 16px; 
-      font-size: 1rem; 
-      border: 1px solid rgba(0, 0, 0, 0.23);
-      border-radius: 4px;
-      background: white;
-      box-sizing: border-box;
-      transition: border-color 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-    }}
-    input:focus {{
-      outline: none;
-      border-color: #1976d2;
-      border-width: 2px;
-      padding: 11px 15px;
-    }}
-    .meta {{ color: rgba(0, 0, 0, 0.6); font-size: 0.875rem; margin-top: 0.5rem; text-align: right; }}
-    .item {{ 
-      background: white; 
-      border-radius: 4px; 
-      padding: 16px; 
-      margin-bottom: 16px; 
-      box-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
-      content-visibility: auto;
-      contain-intrinsic-size: 120px;
-    }}
-    .title {{ 
-      font-size: 1.25rem; 
-      font-weight: 500; 
-      margin-bottom: 8px;
-      color: rgba(0, 0, 0, 0.87);
-    }}
-    .field {{ 
-      margin-top: 8px; 
-      display: flex;
-      flex-direction: column;
-    }}
-    .label {{ 
-      font-size: 0.75rem; 
-      color: rgba(0, 0, 0, 0.6); 
-      font-weight: 400;
-      text-transform: uppercase;
-      letter-spacing: 0.08333em;
-    }}
-    .value {{ 
-      font-family: 'Roboto Mono', monospace; 
-      font-size: 0.875rem;
-      word-break: break-all;
-      background: #f8f8f8;
-      padding: 4px 8px;
-      border-radius: 4px;
-      margin-top: 2px;
-    }}
+    body {{ font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; margin: 2rem; background: #fafafa; }}
+    h1 {{ margin-bottom: 0.2rem; }}
+    .meta {{ color: #666; margin-bottom: 1.5rem; }}
+    input {{ width: 100%; padding: 0.6rem; font-size: 1rem; margin-bottom: 1rem; }}
+    .item {{ background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); }}
+    .title {{ font-size: 1.1rem; font-weight: 600; }}
+    .field {{ margin-top: 0.3rem; }}
+    .label {{ font-weight: 500; color: #444; }}
+    .value {{ font-family: monospace; white-space: pre-wrap; }}
+    .hidden {{ display: none; }}
   </style>
 </head>
 <body>
 
-<div class="app-bar">
-  <h1>Bitwarden Vault</h1>
-  <div style="font-size: 0.8rem; opacity: 0.8;">Generated {generated}</div>
-</div>
+<h1>Bitwarden Vault</h1>
+<div class="meta">Generated {generated}</div>
 
-<div class="container">
-  <div class="search-container">
-    <input id="search" placeholder="Search name, username, URI, notes…" autofocus />
-  </div>
+<input id="search" placeholder="Search name, username, URI, notes…" autofocus />
 
-  <div id="items"></div>
-</div>
+<div id="items"></div>
 
 <script>
 const DATA = {data};
@@ -122,14 +49,9 @@ const DATA = {data};
 const container = document.getElementById('items');
 const search = document.getElementById('search');
 
-let visibleCount = 100;
-
 function render(items) {{
   container.innerHTML = '';
-  const fragment = document.createDocumentFragment();
-  const slice = items.slice(0, visibleCount);
-
-  slice.forEach(item => {{
+  items.forEach(item => {{
     const div = document.createElement('div');
     div.className = 'item';
 
@@ -141,23 +63,17 @@ function render(items) {{
       ${{item.notes ? `<div class="field"><span class="label">Notes:</span> <span class="value">${{item.notes}}</span></div>` : ''}}
     `;
 
-    fragment.appendChild(div);
+    container.appendChild(div);
   }});
-  container.appendChild(fragment);
 }}
 
-let debounceTimer;
 function filter() {{
-  const q = search.value.toLowerCase().trim();
-  const filtered = q ? DATA.filter(i => i.search.includes(q)) : DATA;
+  const q = search.value.toLowerCase();
+  const filtered = DATA.filter(i => i.search.includes(q));
   render(filtered);
 }}
 
-search.addEventListener('input', () => {{
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(filter, 150);
-}});
-
+search.addEventListener('input', filter);
 render(DATA);
 </script>
 
